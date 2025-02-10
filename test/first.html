@@ -1,0 +1,23 @@
+<html>
+    <body>
+        <script>
+            const loadImage = async (url) => {
+                return new Promise((resolve, reject)=> {
+                    const img = new Image();
+                    img.onload = () => {
+                        resolve(img);
+                    }
+                    img.onerror = (error) => {
+                        reject(error);
+                    }
+                    img.src = url;
+                })
+            }
+            const start = async () => {
+                const myImage = await loadImage('https://picsum.photos/200/300');
+                document.body.appendChild(myImage);
+            }
+            start();
+        </script>
+    </body>
+</html>
