@@ -13,6 +13,17 @@
     "canvas-sketch": "^0.7.7",
     "canvas-sketch-util": "^1.10.0",
     "colormap": "^2.3.2",
-    "riso-colors": "^1.0.1"
+    "glsl-dither": "^1.0.1",
+    "glsl-noise": "^0.0.0",
+    "glslify": "^7.1.1",
+    "hex-rgb": "^5.0.0",
+    "nice-color-palettes": "^4.0.0",
+    "p5": "^1.11.3",
+    "perspective-camera": "^2.0.1",
+    "primitive-icosphere": "^1.0.2",
+    "random": "^5.1.1",
+    "regl": "^2.1.1",
+    "riso-colors": "^1.0.1",
+    "three": "^0.173.0"
   }
 }

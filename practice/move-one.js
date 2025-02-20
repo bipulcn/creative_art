@@ -3,17 +3,21 @@ const random = require('canvas-sketch-util/random');
 
 const settings = {
   dimensions: [ 2048, 2048 ],
-  animate: true
+  animate: true,
+  duration: 3,
+  fps: 1,
 };
 
-let eCanvas;
+let eCanvas, rx, ry, cunt =0;
 let cursor = {x: 9999, y:9999};
 
 const sketch = ({width, height, canvas}) => {
   eCanvas = canvas;
+  let num = 100;
+  rx = Math.floor(random.range(0, num));
+  ry = Math.floor(random.range(0, num));
   canvas.addEventListener('mousedown', onMouseDown);
   let balls = [];
-  let num = 100;
   for(let i = 0; i < num -1; i++) {
     for(let j =0; j < num -1; j++){
     balls.push( new Ball(50+width*(1/num)*i, 50+height*(1/num)*j, 10, i, j));
@@ -65,8 +69,8 @@ class Ball {
     this.pushF = 0.02;
     this.pullF = 0.004;
     this.dumpF = 0.90;
-    this.rx = Math.floor(random.range(0, 50));
-    this.ry = Math.floor(random.range(0, 50));
+    this.px = px;
+    this.py = py;
     this.cunt = 0;
   }
   update() {
@@ -94,18 +98,34 @@ class Ball {
 
     this.x += this.vx;
     this.y += this.vy;
-    // this.x += 1;
-    // this.y += 1;
+    if(cunt>50000){
+      rx = Math.floor(rx+random.range(-1.1, 2));
+      ry = Math.floor(ry+random.range(-1.1, 2));
+      if(rx<0) rx =0;
+      if(ry<0) ry =0;
+      if(rx>100) rx = 100;
+      if(ry>100) ry = 100;
+      cunt = 0;
+    }else cunt++;
   }
   draw(context) {
-    context.save();
-    context.beginPath();
-    context.translate(this.x, this.y);
-    context.arc(0, 0, this.radius, 0, 2 * Math.PI);
-    if(this.px==this.rx && this.py==this.ry) context.fillStyle = 'green';
-    else
-    context.fillStyle = 'skyblue';
-    context.fill();
-    context.restore();
+    // setTimeout(function(){
+      // requestAnimationFrame(this.Function.draw);
+      context.save();
+      context.beginPath();
+      context.translate(this.x, this.y);
+      context.arc(0, 0, this.radius, 0, 2 * Math.PI);
+      if(this.px==rx && this.py==ry) {context.fillStyle = 'red';context.scaleX = 1.5;}
+      else
+        context.fillStyle = 'skyblue';
+      context.fill();
+      context.restore();
+    // }, 1000/10);
   }
 }
+/*
+setTimeout(function() {
+        requestAnimationFrame(draw);
+        // Drawing code goes here
+    }, 1000 / fps);
+*/
