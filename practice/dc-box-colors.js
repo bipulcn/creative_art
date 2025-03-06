@@ -31,13 +31,14 @@ const sketch = ({ context, width, height }) => {
     y = random.range(0, height);
     w = random.range(200, 600);
     h = random.range(40, 200);
+    op = random.range(40, 100)/100;
 
     fill = random.pick(rectColors).hex;
     stroke = random.pick(rectColors).hex;
 
     blend = random.value() > 0.5 ? "overlay" : "source-over";
 
-    rects.push({ x, y, w, h, fill, stroke, blend });
+    rects.push({ x, y, w, h, fill, stroke, blend, op });
   }
 
   return ({ context, width, height }) => {
@@ -45,12 +46,12 @@ const sketch = ({ context, width, height }) => {
     context.fillRect(0, 0, width, height);
 
     rects.forEach((rect) => {
-      const { x, y, w, h, fill, stroke, blend } = rect;
+      const { x, y, w, h, fill, stroke, blend, op } = rect;
 
 
-      let obj = new drawSkRect({fill, stroke, x, y, w, h, degrees });
+      let obj = new drawSkRect({fill, blend, stroke, x, y, w, h, degrees });
       obj.draw(context);
-      let shed = new shadowPrt({fill: fill, strok: stroke });
+      let shed = new shadowPrt({fill: fill, strok: stroke, opacity: op });
       shed.draw(context);
     });
     context.save();
@@ -81,14 +82,15 @@ const shadowPart = ({ context, fill, strok }) => {
 }
 
 class shadowPrt {
-  constructor({ fill, strok }) {
+  constructor({ fill, strok, opacity }) {
     this.fill = fill;
     this.strok = strok;
+    this.opacity = opacity;
   }
 
   draw(context) {
     let shadowColor = Color.offsetHSL(this.fill, 0, 0, -20);
-    shadowColor.rgba[3] = 0.5;
+    shadowColor.rgba[3] = this.opacity;
 
     context.shadowColor = Color.style(shadowColor.rgba);
     context.shadowOffsetX = -20;
@@ -100,7 +102,7 @@ class shadowPrt {
 
     context.globalCompositeOperation = "source-over";
 
-    context.lineWidth = 2;
+    context.lineWidth = 7;
     context.strokeStyle = this.strok;
     context.stroke();
     context.restore();
