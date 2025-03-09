@@ -16,12 +16,12 @@ const sketch = ({ context, width, height }) => {
   // let radius, angle, rx, ry;
   const mask = {
     radious: width * 0.48,
-    sides: 10,
+    sides: 6,
     x: width * 0.5,
     y: height * 0.5,
   }
   const num = 80;
-  const degrees = -15;
+  const degree = -15;
 
   const rects = [];
 
@@ -53,16 +53,15 @@ const sketch = ({ context, width, height }) => {
     // context.save();
 
     context.translate(mask.x, mask.y);
-    drawPolyShape({ context, radious: mask.radious - context.lineWidth, sides: mask.sides });
+    drawPolyShape({ context, radious: mask.radious, sides: mask.sides });
 
     context.clip();
 
     rects.forEach((rect) => {
       const { x, y, w, h, fill, stroke, blend, op } = rect;
-
       context.save();
       context.translate(width * -0.5, height * -0.5);
-      let obj = new drawSkRect({ fill, blend, stroke, x, y, w, h, degrees });
+      let obj = new drawSkRect({ fill, blend, stroke, x, y, w, h, degree });
       obj.draw(context);
 
       let shed = new shadowPrt({ fill: fill, strok: stroke, opacity: op });
@@ -73,7 +72,7 @@ const sketch = ({ context, width, height }) => {
     context.save();
 
     context.translate(mask.x, mask.y);
-    drawPolyShape({ context, radious: mask.radious - context.lineWidth * 2, sides: mask.sides });
+    drawPolyShape({ context, radious: mask.radious-10, sides: mask.sides });
     context.lineWidth = 20;
     context.globalCompositeOperation = 'color-burn';
     context.strokeStyle = rectColors[0];
@@ -87,19 +86,18 @@ const sketch = ({ context, width, height }) => {
 canvasSketch(sketch, setting);
 const drawPolyShape = ({ context, sides, radious = 450 }) => {
   const side = Math.PI * 2 / sides;
+  context.save();
   context.beginPath();
   // context.moveTo(0, radious);
   for (let i = 0; i < sides; i++) {
-    console.log(i);
     let evn = (sides % 2==0)? 1: 2;
-    // let nang = ang * i  - Math.PI*(0.5 - evn/this.side);
     const theta = i * side - Math.PI * (0.5 - evn / sides);
     let x = Math.cos(theta) * radious;
     let y = Math.sin(theta) * radious;
-    console.log(parseInt(x), parseInt(y));
     context.lineTo(x, y);
   }
   context.closePath();
+  context.restore();
 }
 
 class shadowPrt {
@@ -132,7 +130,7 @@ class shadowPrt {
 
 
 class drawSkRect {
-  constructor({ fill, blnd, strk, x = 0, y = 0, w = 600, h = 200, degrees = -45 }) {
+  constructor({ fill, blnd, strk, x = 0, y = 0, w = 600, h = 200, degrees = -10 }) {
     this.cfill = fill;
     this.blend = blnd;
     this.stroke = strk;
@@ -140,6 +138,7 @@ class drawSkRect {
     this.h = h;
     this.x = x;
     this.y = y;
+    // degrees = random.range(0, 90);
     this.angle = math.degToRad(degrees);
     this.rx = Math.cos(this.angle) * w;
     this.ry = Math.sin(this.angle) * w;
@@ -147,6 +146,7 @@ class drawSkRect {
     this.my = this.y;
   }
   draw(context) {
+    console.log(this.angle);
     context.translate(this.x, this.y);
     context.strokeStyle = this.stroke;
     context.fillStyle = this.cfill;
