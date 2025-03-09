@@ -38,6 +38,8 @@ const sketch = ({ context, width, height }) => {
     y = random.range(0, height);
     w = random.range(600, width);
     h = random.range(40, 200);
+    op = random.range(40, 100)/100;
+
     stroke = random.pick(rectColor);
     fill = random.pick(rectColor);
     blend = (random.value()>0.5)? 'overlay': 'source-over';
@@ -57,29 +59,15 @@ const sketch = ({ context, width, height }) => {
 
     rects.forEach(rect=> {
       const {x, y, w, h, fill, stroke, blend} = rect;
+      
       context.save();
       context.translate(width * -0.5, height * -0.5);
-      context.translate(x, y);
-      context.strokeStyle = stroke;
-      context.fillStyle = fill;
-      context.lineWidth = 10;
 
-      context.globalCompositeOperation = blend;
-      drawSkewRect({ context, w, h, degrees });
+      let obj = new drawSkRect({fill, blend, stroke, x, y, w, h, degrees });
+      obj.draw(context);
       
-      shadowColor = color.offsetHSL(fill, 0, 0, -20);
-      shadowColor.rgba[3] = 0.5; 
-      context.shadowColor = color.style(shadowColor.rgba);  // Add shadow color here
-      context.shadowOffsetX = -10;
-      context.shadowOffsetY = 20;
-      context.fill()
-      context.shadowColor = null;
-      context.stroke();
-      context.globalCompositeOperation = 'source-over';
-
-      context.lineWidth = 2;
-      context.strokeStyle = 'black';
-      context.stroke();
+      let shed = new shadowPrt({fill: fill, strok: stroke, opacity: op });
+      shed.draw(context);
 
       context.restore(); 
     });
@@ -99,26 +87,9 @@ const sketch = ({ context, width, height }) => {
   };
 };
 
-const drawSkewRect = ({ context, w = 600, h = 200, degrees = 30 }) => {
-  const angle = math.degToRad(degrees);
-  const rx = Math.cos(angle) * w;
-  const ry = Math.sin(angle) * w;
-
-  context.save();
-  context.translate(rx * -0.5, (ry + h) * -0.5);
-
-  context.beginPath();
-  context.moveTo(0, 0);
-  context.lineTo(rx, ry);
-  context.lineTo(rx, ry + h);
-  context.lineTo(0, h);
-  context.closePath();
-  context.restore();
-}
-
 const drawPolyShape = ({context, sides, radious=450}) => {
   const side = Math.PI * 2 / sides;
-  console.log(radious);
+  // console.log(radious);
   context.beginPath();
   context.moveTo(0, -radious);
   for (let i = 1; i < sides; i++) {
@@ -129,3 +100,66 @@ const drawPolyShape = ({context, sides, radious=450}) => {
 }
 
 canvasSketch(sketch, settings);
+
+
+class shadowPrt {
+  constructor({ fill, strok, opacity }) {
+    this.fill = fill;
+    this.strok = strok;
+    this.opacity = opacity;
+  }
+
+  draw(context) {
+    let shadowColor = color.offsetHSL(this.fill, 0, 0, -20);
+    shadowColor.rgba[3] = this.opacity;
+
+    context.shadowColor = color.style(shadowColor.rgba);
+    context.shadowOffsetX = -20;
+    context.shadowOffsetY = 20;
+
+    context.fill();
+    context.shadowColor = null;
+    context.stroke();
+
+    context.globalCompositeOperation = "source-over";
+
+    context.lineWidth = 6;
+    context.strokeStyle = this.strok;
+    context.stroke();
+  }
+}
+
+class drawSkRect {
+  constructor({ fill, blnd, strk, x=0, y=0, w = 600, h = 200, degrees = -45 }) {
+    this.cfill = fill;
+    this.blend = blnd;
+    this.stroke = strk;
+    this.w = w;
+    this.h = h;
+    this.x = x;
+    this.y = y;
+    this.angle = math.degToRad(degrees);
+    this.rx = Math.cos(this.angle) * w;
+    this.ry = Math.sin(this.angle) * w;
+    this.mx = this.x;
+    this.my = this.y;
+  }
+  draw(context) {    
+    context.translate(this.x, this.y);
+    context.strokeStyle = this.stroke;
+    context.fillStyle = this.cfill;
+    context.lineWidth = 10;
+
+    context.globalCompositeOperation = this.blend;
+
+    context.save();
+    context.translate(this.rx * -0.5, (this.ry + this.h) * -0.5);
+    context.beginPath();
+    context.moveTo(0, 0);
+    context.lineTo(this.rx, this.ry);
+    context.lineTo(this.rx, this.ry + this.h);
+    context.lineTo(0, this.h);
+    context.closePath();
+    context.restore();
+  }
+}
