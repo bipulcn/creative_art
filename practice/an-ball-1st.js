@@ -1,4 +1,5 @@
 const canvasSketch = require('canvas-sketch');
+const random = require('canvas-sketch-util/random');
 
 const settings = {
   dimensions: [ 2048, 2048 ], 
@@ -7,6 +8,7 @@ const settings = {
 
 let cnvs = null;
 let bx;
+let balls = [];
 // const ctn = cnvs.getContext('2d');
 
 const sketch = ({width, height, canvas}) => {
@@ -14,12 +16,20 @@ const sketch = ({width, height, canvas}) => {
   cnvs = canvas;
   bx = new MBox({x:200, y: 300, h: 120, w: 180, color: 'green'});
   let box = new Box({x:width*0.5, y:height*0.1, width:100, height:100, color:'red', w: width, h:height}); // create a box at position (100, 100) with width 100 and height 100, color red, and type 'box'
-  const obj = new Ball({x: width*0.5, y: height*0.5, radious: 30, color: 'blue'});
+  for(let i=0; i< 10000; i++){
+    let rx = random.range(0, width);
+    let ry = random.range(0, height);
+    const obj = new Ball({x: rx, y: ry, radious: 10, color: 'blue', width:width, height:height});
+    balls.push(obj);
+  }
+  // console.log(random.value());
   return ({ context, width, height }) => {
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
-    obj.draw(context);
-    obj.update();
+    balls.forEach((obj)=>{
+      obj.draw(context);
+      obj.update();
+    });
     
     box.draw(context);
     box.update();
@@ -84,8 +94,10 @@ class Ball {
     this.y = y;
     this.radious = radious;
     this.color = color;
-    this.sx = 4;
-    this.sy = 5;
+    let rx = random.range(0, 100)/25
+    let ry = random.range(0, 100)/25
+    this.sx = (random.value()<0.5)? -1*rx: rx;//(random.range());
+    this.sy = (random.value()<0.5)? -1*ry: ry;
     this.px = 0;
     this.py = 0;
     this.w = width;
@@ -96,20 +108,20 @@ class Ball {
     context.fillStyle = this.color;
     context.translate(this.x, this.y);
     context.beginPath();
-    context.arc(this.px, this.py, this.radious, 0, Math.PI * 2);
+    context.arc(0,0, this.radious, 0, Math.PI * 2);
     context.lineWidth = 8;
     context.fill();
     context.closePath();    
     context.restore();
   }
   update() {
-    this.px += this.sx;
-    this.py += this.sy;
-    if(this.px > this.w || this.px < -this.w) {
+    this.x += this.sx;
+    this.y += this.sy;
+    if(this.x > this.w || this.x < 0) {
       this.sx = -this.sx;
       // this.x = this.w-this.radious;
     }
-    if(this.py > this.h || this.py < -this.h) {
+    if(this.y > this.h || this.y < 0) {
       this.sy = -this.sy;
       // this.y = this.h-this.radious;
     }

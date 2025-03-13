@@ -9,7 +9,7 @@ const settings = {
 
 const sketch = ({width, height}) => {
   const agetns = [];
-  for(let i = 0; i < 40; i++) {
+  for(let i = 0; i < 50; i++) {
     const x = random.range(0, width);
     const y = random.range(0, height);
     agetns.push(new Agent(x, y));
