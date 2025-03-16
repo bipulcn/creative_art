@@ -11,6 +11,7 @@ const settings = {
 
 const particles = [];
 
+
 const cursor = { x: 9999, y: 9999 };
 
 const colors = colormap({
@@ -20,6 +21,7 @@ const colors = colormap({
 
 let elCanvas;
 let imgA;
+let mpos = { x: 0, y: 0 };
 
 const sketch = ({ width, height, canvas }) => {
   let x, y, particle, radious;

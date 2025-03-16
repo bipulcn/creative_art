@@ -2,13 +2,14 @@ const canvasSketch = require('canvas-sketch');
 const random = require('canvas-sketch-util/random');
 
 const settings = {
-  dimensions: [ 2048, 2048 ], 
+  dimensions: [ 1500, 2250 ], 
   animate: true,
 };
 
 let cnvs = null;
 let imgA;
 let balls = [];
+let cursor = { x: 9999, y: 9999 };
 // const ctn = cnvs.getContext('2d');
 
 const sketch = ({width, height, canvas}) => {
@@ -22,13 +23,13 @@ const sketch = ({width, height, canvas}) => {
   imgAContext.drawImage(imgA, 0, 0);
   const imgAData = imgAContext.getImageData(0, 0, imgA.width, imgA.height).data;
 
-  // canvas.addEventListener('mousedown', onMouseDown);
+  canvas.addEventListener('mousedown', onMouseDown);
   cnvs = canvas;
-  for(let i=0; i< 100; i++){
+  for(let i=0; i< width/20; i++){
     let x, y, ix, iy, idx, r, g, b, colA;
-    for(let j=0; j< 100; j++){
-      x = i*20.5;
-      y = j*20.5;      
+    for(let j=0; j< height/20; j++){
+      x = 10+i*20;
+      y = 10+j*20;      
       ix = Math.floor((x / width) * imgA.width);
       iy = Math.floor((y / height) * imgA.height);
       
@@ -48,6 +49,7 @@ const sketch = ({width, height, canvas}) => {
     
     balls.forEach((obj)=>{
       obj.draw(context);
+      obj.update();
     });
     context.drawImage(imgACanvas, 0, 0);
   };
@@ -62,26 +64,32 @@ const onMouseDown = (en) => {
   const rc = cnvs.getBoundingClientRect();
   const cx = (x - rc.left)/(rc.right - rc.left) * cnvs.width;
   const cy = (y - rc.top)/(rc.bottom - rc.top) * cnvs.height;
-  ob.x = bx.x -cx;
-  ob.y = bx.y -cy;
-  if(Math.abs(ob.x)< bx.w*0.5 && Math.abs(ob.y)< bx.h*0.5)
-    bx.isDragging = true;
-  else bx.isDragging = false;
+  // ob.x = bx.x -cx;
+  // ob.y = bx.y -cy;
+  // if(Math.abs(ob.x)< bx.w*0.5 && Math.abs(ob.y)< bx.h*0.5)
+  //   bx.isDragging = true;
+  // else bx.isDragging = false;
 }
 const onMouseMove = (en) => {
-  let x = en.clientX;
-  let y = en.clientY;
-  const rc = cnvs.getBoundingClientRect();
-  const cx = (x - rc.left)/(rc.right - rc.left) * cnvs.width;
-  const cy = (y - rc.top)/(rc.bottom - rc.top) * cnvs.height;
-  if(bx.isDragging) {
-    bx.x = cx + ob.x;
-    bx.y = cy + ob.y;
-  }
+  const x = (en.offsetX / cnvs.offsetWidth) * cnvs.width;
+  const y = (en.offsetY / cnvs.offsetHeight) * cnvs.height;
+  cursor.x = x;
+  cursor.y = y;
+  // let x = en.clientX;
+  // let y = en.clientY;
+  // const rc = cnvs.getBoundingClientRect();
+  // const cx = (x - rc.left)/(rc.right - rc.left) * cnvs.width;
+  // const cy = (y - rc.top)/(rc.bottom - rc.top) * cnvs.height;
+  // if(bx.isDragging) {
+  //   bx.x = cx + ob.x;
+  //   bx.y = cy + ob.y;
+  // }
 }
 const onMouseUp = (en) => {
   cnvs.removeEventListener('mousemove', onMouseMove);
   cnvs.removeEventListener('mousedown', onMouseUp);
+  cursor.x = 9999;
+  cursor.y = 9999;
 }
 
 const loadImage = async (url) => {
@@ -95,7 +103,8 @@ const loadImage = async (url) => {
 
 const start = async () => {
   imgA = await loadImage('images/photo3.jpg');
-
+  settings['dimensions'][0] = imgA.width*12;
+  settings['dimensions'][1] = imgA.height*12;
   canvasSketch(sketch, settings);
 }
 
@@ -108,7 +117,53 @@ class Ball {
     this.y = y;
     this.radious = radious;
     this.color = color;
+
+    // Acceleration
+    this.ax = 0;
+    this.ay = 0;
+    // Velocity
+    this.vx = 0;
+    this.vy = 0;
+    // Initial Position
+    this.ix = x;
+    this.iy = y;
+    this.ir = radious;
+    
+    this.minDist = random.range(90, 150);
+    this.pushFractor = 0.01;
+    this.pullFactor = 0.002;
+    this.dampFactor = 0.95;
   }
+
+  update() {
+    let dx, dy, dd, distDelta;
+    // Pull Force
+    dx = this.ix - this.x;
+    dy = this.iy - this.y;
+    this.radious = this.ir + (Math.abs(dx) + Math.abs(dy))*0.08;
+
+    this.ax = dx * this.pullFactor;
+    this.ay = dy * this.pullFactor;
+    
+    dx = this.x - cursor.x;
+    dy = this.y - cursor.y;
+    dd = Math.sqrt(dx * dx + dy * dy);
+    distDelta = this.minDist - dd;
+
+    if(dd<this.minDist) {
+      this.ax += (dx/dd) * distDelta * this.pushFractor;
+      this.ay += (dy/dd) * distDelta * this.pushFractor;
+    }
+    this.vx += this.ax;
+    this.vy += this.ay;
+
+    this.vx *= this.dampFactor;
+    this.vy *= this.dampFactor;
+
+    this.x += this.vx;
+    this.y += this.vy;
+  } 
+
   draw(context) {
     context.save();
     context.fillStyle = this.color;
