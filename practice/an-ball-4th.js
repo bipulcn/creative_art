@@ -169,8 +169,8 @@ class Ball {
     context.fillStyle = this.color;
     context.translate(this.x, this.y);
     context.beginPath();
-    context.arc(0,0, this.radious, 0, Math.PI * 2);
-    context.lineWidth = 8;
+    context.fillRect(-10, -10, this.radious*2, this.radious*2);
+    // context.arc(0,0, this.radious, 0, Math.PI * 2);
     context.fill();
     context.closePath();    
     context.restore();
