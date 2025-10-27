@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {text-align: center;}
+        /* Optional: Add a border to see the canvas area */
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="800" height="600"></canvas>
+
+
+    <script>
+        // Get the canvas element
+        const canvas = document.getElementById('myCanvas');
+
+        // Get the 2D drawing context
+        const ctx = canvas.getContext('2d');
+// --- Animation State ---
+        let circleX = 50; // Initial X position
+        const circleY = 100; // Constant Y position
+        const radius = 30;
+        const speed = 1.5; // Pixels to move per frame
+        const speed2 = 3; // Pixels to move per frame
+
+        // --- The Animation Function ---
+        function animate() {
+            // 1. Clear the canvas
+            // Clear the entire canvas from top-left (0,0) to bottom-right
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Update the state
+            circleX = circleX + speed; // Move the circle to the right
+
+            // Optional: Reset position if it goes off-screen
+            if (circleX - radius > canvas.width) {
+                circleX = 0 - radius; // Reset to just off the left edge
+            }
+
+            // 3. Draw the shape
+            ctx.fillStyle = 'dodgerblue';
+            ctx.beginPath();
+            ctx.arc(circleX, circleY, radius, 0, Math.PI * 2); // Draw circle at new position
+            ctx.fill();
+
+            // 4. Repeat: Ask for the next frame
+            requestAnimationFrame(animate);
+        }
+        
+        function animate2() {
+            // 1. Clear the canvas
+            // Clear the entire canvas from top-left (0,0) to bottom-right
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Update the state
+            circleX = circleX + speed2-1; // Move the circle to the right
+
+            // Optional: Reset position if it goes off-screen
+            if (circleX - radius > canvas.width) {
+                circleX = 0 - radius; // Reset to just off the left edge
+            }
+
+            // 3. Draw the shape
+            ctx.fillStyle = 'skyblue';
+            ctx.beginPath();
+            ctx.arc(circleX, circleY+100, radius, 0, Math.PI * 2); // Draw circle at new position
+            ctx.fill();
+
+            // 4. Repeat: Ask for the next frame
+            requestAnimationFrame(animate2);
+        }
+
+        // --- Start the Animation ---
+        // Call animate() the first time to kick things off
+        animate2();
+        animate();
+    </script>
+</body>
+</html>

@@ -1,23 +1,74 @@
+<!DOCTYPE html>
 <html>
-    <body>
-        <script>
-            const loadImage = async (url) => {
-                return new Promise((resolve, reject)=> {
-                    const img = new Image();
-                    img.onload = () => {
-                        resolve(img);
-                    }
-                    img.onerror = (error) => {
-                        reject(error);
-                    }
-                    img.src = url;
-                })
-            }
-            const start = async () => {
-                const myImage = await loadImage('https://picsum.photos/200/300');
-                document.body.appendChild(myImage);
-            }
-            start();
-        </script>
-    </body>
+<head>
+    <title>Canvas Basics</title>
+    <style>
+        /* Optional: Add a border to see the canvas area */
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="myCanvas" width="600" height="400"></canvas>
+
+    <script>
+        // Get the canvas element
+        const canvas = document.getElementById('myCanvas');
+
+        // Get the 2D drawing context
+        const ctx = canvas.getContext('2d');
+        ctx.strokeStyle = '#003399'; // Red color
+        ctx.strokeRect(10, 10, 300, 200)
+
+        ctx.strokeStyle = '#00EE99'; // Red color
+
+        ctx.beginPath();
+        ctx.moveTo(10, 10);
+        ctx.lineTo(250, 150);
+        ctx.lineTo(100, 300);
+        ctx.closePath();
+        ctx.stroke();
+        // ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(300, 200);
+
+        ctx.strokeStyle = '#FF0000'; // Red color using hex code
+        // ctx.lineWidth = 1;
+
+        ctx.arc(300, 200, 50, Math.PI / 180 * 0, Math.PI / 180 * 190, true);
+        ctx.stroke();
+
+
+        ctx.beginPath();
+        ctx.moveTo(50, 200); // Starting point
+        // Control point (150, 50), End point (250, 200)
+        ctx.quadraticCurveTo(150, 50, 250, 200);
+        ctx.quadraticCurveTo(300, 250, 450, 200);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'green';
+        ctx.stroke(); // Draw the curve
+        
+        ctx.beginPath();
+        ctx.moveTo(100, 200); // Start point for the first curve
+
+        // First cubic Bezier segment
+        // cp1=(150, 50), cp2=(250, 350), end=(300, 200)
+        ctx.bezierCurveTo(150, 50, 250, 350, 300, 200);
+
+        // Second cubic Bezier segment starts automatically from (300, 200)
+        // cp1=(350, 50), cp2=(450, 350), end=(500, 200)
+        ctx.bezierCurveTo(350, 50, 450, 350, 500, 200);
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'orange';
+        ctx.stroke(); // Draw the combined curve
+        
+        // We'll add drawing commands here later!
+        console.log("Canvas element:", canvas);
+        console.log("Drawing context:", ctx);
+    </script>
+
+</body>
 </html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {text-align: center;}
+        /* Optional: Add a border to see the canvas area */
+        canvas {
+            border: 1px solid black;
+
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="600" height="400"></canvas>
+
+    <script>
+        // Get the canvas element
+        const canvas = document.getElementById('myCanvas');
+
+        // Get the 2D drawing context
+        const ctx = canvas.getContext('2d');
+        // Get context (assuming you have 'ctx')
+
+        // Rectangle 1
+        ctx.fillStyle = 'red';
+        ctx.fillRect(20, 30, 80, 50); // Position (20, 30)
+
+        // --- Prepare for Rectangle 2 ---
+        ctx.save(); // Save the current state (origin at 0,0)
+
+        // Move the origin to where Rectangle 2 should start
+        ctx.translate(150, 100);
+        
+        // 2. Rotate the canvas by 45 degrees
+        const degrees = 45;
+        const radians = degrees * Math.PI / 180;
+        ctx.rotate(radians);
+
+        // Rectangle 2 (drawn relative to the NEW origin at 150, 100)
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(0, 0, 80, 50); // Draw at (0,0) of the translated coordinates
+
+        ctx.restore(); // Restore the state (origin back to 0,0)
+        // --- Done with Rectangle 2 ---
+
+        // Any further drawing here will use the original (0,0) origin
+    </script>
+</body>
+</html>
