@@ -1,1 +1,4 @@
 .qodo
+/practice/node_modules/*
+/sketch-new/node_modules/*
+/sketchs/node_modules/*

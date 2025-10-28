@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {text-align: center;}
+        /* Optional: Add a border to see the canvas area */
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="800" height="600"></canvas>
+
+
+    <script>
+
+        class Circle {
+            constructor(x, y, radius, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+            }
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            movePos(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+
+            checkDis(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < this.radius) {
+                    this.changeColorOnClick();
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            
+            // Method to handle being clicked
+            changeColorOnClick() {
+                // Change to a random RGB color
+                const r = Math.floor(Math.random() * 256);
+                const g = Math.floor(Math.random() * 256);
+                const b = Math.floor(Math.random() * 256);
+                this.color = `rgb(${r}, ${g}, ${b})`;
+                // console.log("Circle color changed to:", this.color);
+            }
+
+        }
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- State ---
+        let mouseX = lastX = canvas.width / 2; // Start in center
+        let mouseY = lastY = canvas.height / 2;
+        const radius = 30;
+        let move = false;
+        // --- Create a Circle Object ---
+                const myCircle = new Circle(lastX, lastY, radius, 'tomato');
+        // --- Mouse Event Listener ---
+        canvas.addEventListener('mousemove', function(event) {
+            // Calculate mouse position relative to the canvas
+            const rect = canvas.getBoundingClientRect(); // Gets canvas size & position
+            mouseX = event.clientX - rect.left;
+            mouseY = event.clientY - rect.top;
+            
+        });
+        canvas.addEventListener('mousedown', function() {
+            // myCircle.changeColorOnClick();
+            if(myCircle.checkDis(mouseX, mouseY)){
+                move = true;
+            }
+            
+        });
+        canvas.addEventListener('mouseup', function() {
+            move = false;
+        });
+
+        // --- Animation Function ---
+        function animate() {
+            // 1. Clear
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Update (Handled by mouse listener setting circle properties)
+            if (move) {
+                myCircle.movePos(mouseX, mouseY);
+            }
+
+            // 3. Draw the circle object
+            myCircle.draw(ctx); // Tell the circle object to draw itself
+
+            // 4. Repeat
+            requestAnimationFrame(animate);
+        }
+
+        // --- Start Animation ---
+        animate();
+    </script>
+</body>
+</html>
