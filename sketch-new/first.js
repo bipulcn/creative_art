@@ -5,21 +5,21 @@ const settings = {
   animate: true // Enable animation loop
 };
 
-const sketch = () => {
+const sketch = ({width, height}) => {
   // Setup code (runs once)
   let x = 100;
   let y = 100;
   let speed = 8;
-  let dirX = Math.random();
-  let dirY = Math.random();
+  let dirX = Math.random()*2 - 1;
+  let dirY = Math.random()*2 - 1;
+
 
   // Return the render function
   return ({ context, width, height }) => {
-    // Animation/Drawing loop code (runs repeatedly)
-
     // Clear
     context.fillStyle = 'white'; // White background
     context.fillRect(0, 0, width, height);
+    
 
     // Update
     if (x > width - 20 || x < 0 + 20) dirX *= -1;
@@ -34,5 +34,6 @@ const sketch = () => {
     context.fill();
   };
 };
+
 
 canvasSketch(sketch, settings);
