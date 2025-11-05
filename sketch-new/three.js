@@ -14,8 +14,8 @@ class Ball {
     this.x = x;
     this.y = y;
     this.radius = radius;
-    this.velocityX = (Math.random() - 0.5) * 5;
-    this.velocityY = (Math.random() - 0.5) * 5;
+    this.velocityX = (Math.random() - 0.5) * 1.5;
+    this.velocityY = (Math.random() - 0.5) * 1.5;
     
     // Mass is proportional to the area (PI * r^2)
     // We can just use r^2 for simplicity
@@ -39,8 +39,8 @@ class Ball {
     if (this.y + this.radius > height || this.y - this.radius < 0) {
       this.velocityY *= -1;
     }
-    if(this.velocityX>4) this.velocityX = .5 * Math.sign(this.velocityX);
-    if(this.velocityY>4) this.velocityY = .5 * Math.sign(this.velocityY);
+    if(this.velocityX>2) this.velocityX = .5 * Math.sign(this.velocityX);
+    if(this.velocityY>2) this.velocityY = .5 * Math.sign(this.velocityY);
     this.x += this.velocityX;
     this.y += this.velocityY;
   }
@@ -51,7 +51,7 @@ const sketch = ({ width, height }) => {
   
   // --- Setup (runs once) ---
   const balls = [];
-  const numBalls = 10;
+  const numBalls = 20;
 
   for (let i = 0; i < numBalls; i++) {
     const radius = Math.random() * 15 + 5; // Radius between 5 and 20

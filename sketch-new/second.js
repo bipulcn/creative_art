@@ -24,7 +24,7 @@ const sketch = ({width, height}) => {
     context.fillRect(0, 0, width, height);
     balls.forEach(ball => {
       ball.draw(context);
-      ball.update(width, height );
+      // ball.update(width, height );
     });
   };
 };
