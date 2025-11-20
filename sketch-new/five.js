@@ -13,15 +13,34 @@ class Square {
     this.h = h;
     this.color = color;
     this.dir = 1;
+    this.speed = 1;
+    this.mass = (50-w)/7.0;
+    console.log(this.dir*this.speed*this.mass);
+    this.sibling = [];
   }
 
   draw(context) {
     context.fillStyle = this.color;
-    context.fillRect(this.x, this.y, this.w, this.h);
+    // context.translate(this.x,this.y);
+    // context.translate(this.x, this.y);
+    context.beginPath();
+    
+    context.fillRect(this.x-this.w/2, this.y-this.h/2, this.w, this.h);
+    
     context.save();
-    context.translate(this.x, this.y, this.w, this.h);
-    context.fill();
     context.restore();
+  }
+  update() {
+    this.x += this.dir* this.speed * this.mass;
+    if(this.x + this.w/2 > 600 || this.x - this.w/2< 0) this.dir *= -1;
+    for(let i = 0; i < this.sibling.length; i++) {
+      let dis = Math.sqrt(Math.pow(this.x - this.sibling[i].x, 2) + Math.pow(this.y - this.sibling[i].y, 2));
+      if(dis < this.w/2 + this.sibling[i].w/2+this.mass) {
+        this.dir *= -1;
+        this.sibling[i].dir *= -1;
+      }
+    }
+    // if(this.x+this.w/2 )
   }
 }
 
@@ -32,9 +51,13 @@ const sketch = ({ width, height }) => {
   return ({context, width, height}) => {
     context.fillStyle = 'white'; // White background
     context.fillRect(0, 0, width, height);
-    bx1.draw(context);
     bx2.draw(context);
+    bx1.draw(context);
+    bx1.sibling = [bx2];
+    bx2.sibling = [bx1];
     // context.fill();  
+    bx1.update();
+    bx2.update();
   };
 };
 
