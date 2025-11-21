@@ -16,18 +16,22 @@ class Square {
   }
 
   draw(context) {
+    console.log(context.width);
     context.fillStyle = this.color;
     context.fillRect(this.x, this.y, this.w, this.h);
     context.save();
     context.translate(this.x, this.y, this.w, this.h);
     context.fill();
     context.restore();
+    this.x+=this.dir;
+    if(this.x > 600) this.dir *= -1;
+    if(this.x < 0) this.dir *= -1;
   }
 }
 
 const sketch = ({ width, height }) => {
   let bx1 = new Square(100, 100, 40, 40, 'red');
-  let bx2 = new Square(250, 100, 30, 30, 'blue');
+  let bx2 = new Square(250, 100, 30, 30, 'orange');
   // --- Setup (runs once) ---
   return ({context, width, height}) => {
     context.fillStyle = 'white'; // White background
