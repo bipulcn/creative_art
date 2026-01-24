@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- Import canvas-sketch -->
+    <script src="https://unpkg.com/canvas-sketch@latest/dist/canvas-sketch.umd.js"></script>
+    <style>
+        /* Optional: Add a border to see the canvas area */
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="600" height="400"></canvas>
+
+    <script>
+
+        const settings = {
+            dimensions: [600, 400],
+            animate: true,
+            canvas: document.getElementById('myCanvas'),
+        };
+
+        const particles = [];
+
+        const sketch = ({ width, height }) => {
+            let x, y, particle;
+            for (let i = 0; i < 1; i++) {
+                x = width * 0.5;
+                y = height * 0.5;
+                particle = new Particle({ x, y });
+
+                particles.push(particle);
+            }
+            return ({ context, width, height }) => {
+                context.fillStyle = 'black';
+                context.fillRect(0, 0, width, height);
+
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw(context);
+                })
+            };
+        };
+
+        canvasSketch(sketch, settings);
+
+        class Particle {
+            constructor({ x, y, radius = 10 }) {
+                // position
+                this.x = x;
+                this.y = y;
+
+                // acceleration
+                this.ax = 0;
+                this.ay = 0;
+
+                // velocity
+                this.vx = 0;
+                this.vy = 0;
+
+                // initial postion
+                this.ix = x;
+                this.iy = y;
+
+                this.radius = radius;
+            }
+
+            update() {
+                this.ax += 0.001;
+
+                this.vx += this.ax;
+                this.vy += this.ay;
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x > 600) {
+                    this.x = 0;
+                    this.vx = 0;
+                    this.ax = 0;
+                }
+            }
+            draw(context) {
+                context.save();
+                context.translate(this.x, this.y);
+                context.fillStyle = 'red';
+                context.beginPath();
+                context.arc(0, 0, this.radius, 0, Math.PI * 2);
+                context.fill();
+                context.restore();
+            }
+        }
+    </script>
+</body>
+
+</html>
