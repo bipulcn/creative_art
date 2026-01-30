@@ -5,8 +5,11 @@ const settings = {
   animate: true
 };
 
+let balls = [];
+let colors = ['red', 'green', 'blue', 'yellow', 'orange', 'purple', 'pink', 'black', 'brown', 'cyan', 'magenta', 'lime', 'teal', 'navy', 'maroon', 'olive', 'gold'];
 class Ball {
   constructor(x, y) {
+    this.num = 0;
     this.x = x;
     this.y = y;
     this.radius = 20;
@@ -20,6 +23,11 @@ class Ball {
     this.gravity = 0.05 + rndg; // Force pulling down
     let rnd = Math.random() * 0.25;
     this.bounceFactor = -0.95 + rnd; // Energy kept after bounce (negative to reverse)
+
+    let r = getRandomInteger(0, 255);
+    let g = getRandomInteger(0, 255);
+    let b = getRandomInteger(0, 255);
+    this.color = colors[Math.floor(Math.random() * colors.length)];
   }
 
   update(width, height) {
@@ -47,24 +55,34 @@ class Ball {
       if (this.x - this.radius < 0) this.x = this.radius;
       if (this.x + this.radius > width) this.x = width - this.radius;
     }
+
+    if (this.num == this.y) {
+      this.isDead = true;
+    }
+    this.num = this.y;
   }
 
   draw(context) {
-    context.fillStyle = 'orange';
+    context.fillStyle = this.color;
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.fill();
 
     // Optional: Add a black outline
-    context.strokeStyle = 'tomato';
+    context.strokeStyle = 'grey';
     context.lineWidth = 2;
     context.stroke();
   }
 }
+function getRandomInteger(min, max) {
+  min = Math.ceil(min); // ensures min is integer
+  max = Math.floor(max); // ensures max is integer
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-const sketch = () => {
+const sketch = ({ context, width, height, canvas }) => {
+  canvas.onmousedown = onMouseDown;
   // Create a bunch of balls starting in the middle
-  const balls = [];
   for (let i = 0; i < 10; i++) {
     balls.push(new Ball(50 + i * 50, 100)); // Start them high up
   }
@@ -74,10 +92,17 @@ const sketch = () => {
     context.fillRect(0, 0, width, height);
 
     balls.forEach(ball => {
-      ball.update(width, height);
-      ball.draw(context);
+      if (!ball.isDead) {
+        ball.update(width, height);
+        ball.draw(context);
+      }
     });
+
   };
 };
+
+const onMouseDown = (e) => {
+  balls.push(new Ball(e.offsetX, e.offsetY)); // Start them high up
+}
 
 canvasSketch(sketch, settings);
