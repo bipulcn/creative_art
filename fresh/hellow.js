@@ -25,7 +25,7 @@ class Box {
         context.rotate(this.ang);
         // context.moveTo(-this.width / 2, 0);
         // context.arc(-this.width / 2, -this.height / 2, 10, 0, Math.PI * 2);
-        context.fillRect(-this.width / 2, -this.height / 8, this.width, this.height / 4);
+        context.fillRect(-this.width / 2, -this.height / 16, this.width, this.height / 8);
         // context.lineTo(this.width / 2, 0);
         // context.lineTo(0, -this.height / 2);
         // context.lineTo(0, 0);
@@ -33,6 +33,9 @@ class Box {
         // context.restore();
         context.rotate(-this.ang);
         context.translate(-px, -py);
+    }
+    update() {
+        this.ang += 0.05;
     }
 }
 
@@ -73,6 +76,7 @@ const sketch = () => {
         context.lineWidth = 2;
         box.forEach(box => {
             box.draw(context);
+            box.update();
         });
         context.closePath();
     };
