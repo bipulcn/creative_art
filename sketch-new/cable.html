@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Coaxial Cable - Interactive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        canvas {
+            display: block;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .info {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px 24px;
+            border-radius: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            pointer-events: none;
+            user-select: none;
+        }
+        .info span {
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="info">🖱 <span>Drag</span> to rotate &nbsp;·&nbsp; <span>Scroll</span> to zoom</div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Setup ---
+        const container = document.body;
+        const width = Math.min(800, window.innerWidth - 40);
+        const height = Math.min(800, window.innerHeight - 40);
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: false,
+        });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.localClippingEnabled = true;
+        container.prepend(renderer.domElement);
+
+        // --- Scene ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111122);
+
+        // --- Camera ---
+        const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 2000);
+        camera.position.set(500, 350, 550);
+        camera.lookAt(0, 0, 0);
+
+        // --- Controls ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.rotateSpeed = 0.8;
+        controls.zoomSpeed = 1.2;
+        controls.minDistance = 200;
+        controls.maxDistance = 1200;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        // --- Lights ---
+        const ambient = new THREE.AmbientLight(0x404060, 0.6);
+        scene.add(ambient);
+
+        const keyLight = new THREE.DirectionalLight(0xffeedd, 1.8);
+        keyLight.position.set(400, 600, 300);
+        keyLight.castShadow = true;
+        keyLight.shadow.mapSize.width = 1024;
+        keyLight.shadow.mapSize.height = 1024;
+        keyLight.shadow.camera.near = 1;
+        keyLight.shadow.camera.far = 1200;
+        keyLight.shadow.camera.left = -600;
+        keyLight.shadow.camera.right = 600;
+        keyLight.shadow.camera.top = 600;
+        keyLight.shadow.camera.bottom = -600;
+        scene.add(keyLight);
+
+        const fillLight = new THREE.DirectionalLight(0x4488ff, 0.6);
+        fillLight.position.set(-300, 100, -400);
+        scene.add(fillLight);
+
+        const rimLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        rimLight.position.set(0, -400, 300);
+        scene.add(rimLight);
+
+        const pointLight = new THREE.PointLight(0x6688ff, 0.3, 800);
+        pointLight.position.set(0, 300, 0);
+        scene.add(pointLight);
+
+        // --- Ground / Environment helper ---
+        const gridHelper = new THREE.GridHelper(800, 20, 0x334466, 0x223355);
+        gridHelper.position.y = -220;
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.3;
+        scene.add(gridHelper);
+
+        // --- Clipping plane for cutaway ---
+        const clipPlane = new THREE.Plane(new THREE.Vector3(-0.6, 0.2, 0.8).normalize(), 20);
+
+        // --- Coaxial Cable Layers ---
+
+        // 1. Outer Shield (dark grey, metallic)
+        const shieldGeo = new THREE.CylinderGeometry(300, 300, 280, 80, 1, true);
+        const shieldMat = new THREE.MeshStandardMaterial({
+            color: 0x2a2a3a,
+            roughness: 0.25,
+            metalness: 0.85,
+            side: THREE.DoubleSide,
+            clippingPlanes: [clipPlane],
+            clipShadows: true,
+            envMapIntensity: 1.2,
+        });
+        const shield = new THREE.Mesh(shieldGeo, shieldMat);
+        shield.rotation.x = Math.PI / 2;
+        shield.castShadow = true;
+        shield.receiveShadow = true;
+        scene.add(shield);
+
+        // Shield end caps (top and bottom)
+        const capMat = new THREE.MeshStandardMaterial({
+            color: 0x2a2a3a,
+            roughness: 0.3,
+            metalness: 0.8,
+            side: THREE.DoubleSide,
+            clippingPlanes: [clipPlane],
+            clipShadows: true,
+        });
+        const capTop = new THREE.Mesh(new THREE.RingGeometry(0, 300, 80), capMat);
+        capTop.rotation.x = -Math.PI / 2;
+        capTop.position.y = 140;
+        scene.add(capTop);
+
+        const capBottom = new THREE.Mesh(new THREE.RingGeometry(0, 300, 80), capMat);
+        capBottom.rotation.x = Math.PI / 2;
+        capBottom.position.y = -140;
+        scene.add(capBottom);
+
+        // 2. Insulator (translucent white)
+        const insGeo = new THREE.CylinderGeometry(250, 250, 280, 80, 1, true);
+        const insMat = new THREE.MeshStandardMaterial({
+            color: 0xe8eeff,
+            roughness: 0.15,
+            metalness: 0.05,
+            transparent: true,
+            opacity: 0.85,
+            side: THREE.DoubleSide,
+            clippingPlanes: [clipPlane],
+            clipShadows: true,
+            envMapIntensity: 0.6,
+        });
+        const insulator = new THREE.Mesh(insGeo, insMat);
+        insulator.rotation.x = Math.PI / 2;
+        insulator.castShadow = true;
+        scene.add(insulator);
+
+        // Insulator end caps
+        const insCapMat = new THREE.MeshStandardMaterial({
+            color: 0xe8eeff,
+            roughness: 0.2,
+            metalness: 0.05,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide,
+            clippingPlanes: [clipPlane],
+            clipShadows: true,
+        });
+        const insCapTop = new THREE.Mesh(new THREE.RingGeometry(0, 250, 80), insCapMat);
+        insCapTop.rotation.x = -Math.PI / 2;
+        insCapTop.position.y = 140;
+        scene.add(insCapTop);
+
+        const insCapBottom = new THREE.Mesh(new THREE.RingGeometry(0, 250, 80), insCapMat);
+        insCapBottom.rotation.x = Math.PI / 2;
+        insCapBottom.position.y = -140;
+        scene.add(insCapBottom);
+
+        // 3. Copper Core
+        const coreGeo = new THREE.CylinderGeometry(100, 100, 280, 64, 1, true);
+        const coreMat = new THREE.MeshStandardMaterial({
+            color: 0xcd7f32,
+            roughness: 0.2,
+            metalness: 0.95,
+            side: THREE.DoubleSide,
+            clippingPlanes: [clipPlane],
+            clipShadows: true,
+            envMapIntensity: 1.5,
+        });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        core.rotation.x = Math.PI / 2;
+        core.castShadow = true;
+        core.receiveShadow = true;
+        scene.add(core);
+
+        // Core end caps
+        const coreCapMat = new THREE.MeshStandardMaterial({
+            color: 0xcd7f32,
+            roughness: 0.2,
+            metalness: 0.95,
+            side: THREE.DoubleSide,
+            clippingPlanes: [clipPlane],
+            clipShadows: true,
+            envMapIntensity: 1.5,
+        });
+        const coreCapTop = new THREE.Mesh(new THREE.RingGeometry(0, 100, 64), coreCapMat);
+        coreCapTop.rotation.x = -Math.PI / 2;
+        coreCapTop.position.y = 140;
+        scene.add(coreCapTop);
+
+        const coreCapBottom = new THREE.Mesh(new THREE.RingGeometry(0, 100, 64), coreCapMat);
+        coreCapBottom.rotation.x = Math.PI / 2;
+        coreCapBottom.position.y = -140;
+        scene.add(coreCapBottom);
+
+        // --- Cross-section highlight rings (decorative) ---
+        const ringMat = new THREE.MeshStandardMaterial({
+            color: 0x4a6a9a,
+            roughness: 0.3,
+            metalness: 0.7,
+            transparent: true,
+            opacity: 0.15,
+            side: THREE.DoubleSide,
+            clippingPlanes: [clipPlane],
+            clipShadows: true,
+        });
+
+        for (let y = -130; y <= 130; y += 130) {
+            for (const r of [300, 250, 100]) {
+                const ring = new THREE.Mesh(
+                    new THREE.RingGeometry(r - 2, r + 2, 80),
+                    ringMat
+                );
+                ring.rotation.x = -Math.PI / 2;
+                ring.position.y = y;
+                scene.add(ring);
+            }
+        }
+
+        // --- Glow / highlight on the cut face ---
+        const glowMat = new THREE.MeshBasicMaterial({
+            color: 0x4a8aff,
+            transparent: true,
+            opacity: 0.06,
+            side: THREE.DoubleSide,
+        });
+        // Add a subtle glow disc at the cut plane intersection
+        const glowDisc = new THREE.Mesh(
+            new THREE.CircleGeometry(310, 80),
+            glowMat
+        );
+        // Position it at the clip plane intersection point (approximate)
+        glowDisc.position.set(-40, 30, 50);
+        glowDisc.lookAt(0, 0, 0);
+        scene.add(glowDisc);
+
+        // --- Floating particles for atmosphere ---
+        const particleCount = 300;
+        const positions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 1000;
+        }
+        const particleGeo = new THREE.BufferGeometry();
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particleMat = new THREE.PointsMaterial({
+            color: 0x4488ff,
+            size: 1.2,
+            transparent: true,
+            opacity: 0.2,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true,
+        });
+        const particles = new THREE.Points(particleGeo, particleMat);
+        particles.position.y = 0;
+        scene.add(particles);
+
+        // --- Resize handler ---
+        function onResize() {
+            const w = Math.min(800, window.innerWidth - 40);
+            const h = Math.min(800, window.innerHeight - 40);
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+        window.addEventListener('resize', onResize);
+
+        // --- Animation loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Gentle particle rotation
+            particles.rotation.y += 0.0002;
+            particles.rotation.x += 0.00005;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // --- Handle window resize ---
+        // (already handled above)
+
+        // --- Small UX: double-click to reset view ---
+        renderer.domElement.addEventListener('dblclick', () => {
+            camera.position.set(500, 350, 550);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        });
+
+        console.log('🔄 3D Coaxial Cable — Drag to rotate, scroll to zoom');
+    </script>
+</body>
+</html>
